@@ -1,0 +1,68 @@
+version: "3"
+services:
+
+    mysql:
+        image: mysql:5.7
+        environment:
+            - MYSQL_ROOT_PASSWORD=123456
+            - MYSQL_DATABASE=mxshop1
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=123456
+            - MYSQL_HOST=0.0.0.0
+            - MYSQL_PORT=3306  # cannot change this port to other number
+            - MYSQL_ROOT_HOST=%
+        networks:
+            - backend
+        ports:
+            - '3306:3306'
+        volumes:
+            - './database/mysql:/var/lib/mysql'
+            - './femn.conf:/etc/mysql/mysql.conf.d/femn.cnf'
+        deploy:
+          placement:
+            constraints: [node.role == manager]
+
+    web:
+        image: leipengkai/drf
+        ports:
+            - "8000:8000"
+        networks:
+            - backend
+        depends_on:
+            - mysql
+            - redis
+        deploy:
+          replicas: 10
+          update_config:
+            parallelism: 2
+          restart_policy:
+            condition: on-failure
+
+    redis:
+        image: 'bitnami/redis:latest'
+        environment:
+            - ALLOW_EMPTY_PASSWORD=yes
+        ports:
+            - '6379:6379'
+            # (HOST:CONTAINER)
+        volumes:
+            - ./database/redis:/bitnami
+        networks:
+            - backend
+        deploy:
+          placement:
+            constraints: [node.role == manager]
+
+    visualizer:
+        image: dockersamples/visualizer:stable
+        ports:
+            - "8080:8080"
+        stop_grace_period: 1m30s
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock"
+        deploy:
+          placement:
+            constraints: [node.role == manager]
+            
+networks:  
+  backend:
