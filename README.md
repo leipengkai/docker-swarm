@@ -31,7 +31,7 @@ docker swarm join --token SWMTKN-1-5b08c43sjxzeg2gk4xjcmfkrn41ap7i77okitjr7a45ja
 #### 开始部署
 ```bash
 docker-machine ssh vm1
-git clone https:github.com/leipengkai/docker-swarm.git
+git clone https://github.com/leipengkai/docker-swarm.git
 
 cd docker-swarm
 # 部署
